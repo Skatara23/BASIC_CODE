@@ -1,0 +1,16 @@
+from machine import Pin
+import time
+
+led = Pin("LED", Pin.OUT)  # Assuming LED is connected to GPIO pin inbulid led
+sw = Pin(0, Pin.IN, Pin.PULL_UP)  # Assuming switch is connected to GPIO pin 0 with pull-up resistor
+
+while True:
+    a = sw.value()
+    
+    if a == 0:
+        led.value(0)  # Turn on LED when switch is pressed
+    else:
+        led.value(1)  # Turn off LED when switch is not pressed
+
+    time.sleep(0.1)  # Add a small delay to debounce the switch and reduce CPU usage
+

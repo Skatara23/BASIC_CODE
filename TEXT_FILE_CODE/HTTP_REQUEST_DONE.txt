@@ -1,0 +1,120 @@
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_ADXL345_U.h>
+
+#include <ArduinoJson.h>
+
+#include "ESP8266WiFi.h"
+#include <ESP8266HTTPClient.h>
+
+const char* SSID = "VMS-Tech";
+const char* PASS = "Vms@2023#$";
+
+const char* url = "https://xaapps.com/face_swap/apiproject/sensordata.php";
+
+// SSL fingerprint
+const char fingerprint[] = "5D E2 61 86 36 6C 30 74 D3 C9 FD F1 91 D8 E5 54 D6 39 71 2E";
+
+// Create a JSON document
+StaticJsonDocument<32> doc;
+
+struct accelMeasurement {
+    double x;
+    double y;
+    double z;
+};
+
+struct data {
+    struct accelMeasurement msg;
+};
+
+data measurement;
+
+/* Assign a unique ID to this sensor at the same time */
+Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified(12345);
+
+void setup(void) {
+#ifndef ESP8266
+    while (!Serial); // for Leonardo/Micro/Zero
+#endif
+    Serial.begin(9600);
+
+    // Connect to WiFi
+    WiFi.begin(SSID, PASS);
+
+    // while wifi not connected yet, print '.'
+    // then after it connected, get out of the loop
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+  
+    //print a new line, then print WiFi connected and the IP address
+    Serial.println("");
+    Serial.println("WiFi connected");
+    // Print the IP address
+    Serial.println(WiFi.localIP());
+
+    /* Initialise the sensor */
+    if (!accel.begin()) {
+        /* There was a problem detecting the ADXL345 ... check your connections */
+        Serial.println("Ooops, no ADXL345 detected ... Check your wiring!");
+        while (1);
+    }
+
+    accel.setRange(ADXL345_RANGE_16_G);
+}
+
+void loop(void) {
+    static WiFiClientSecure client;
+    static HTTPClient http;
+
+    static String contentType = "application/json";
+
+    /* Get a new sensor event */
+    sensors_event_t event;
+    accel.getEvent(&event);
+
+    // Assign sensor data to the struct
+    measurement.msg.x = event.acceleration.x;
+    measurement.msg.y = event.acceleration.y;
+    measurement.msg.z = event.acceleration.z;
+
+    // Clear the JSON document
+    doc.clear();
+
+    // Create a nested JSON object
+    JsonObject dataObj = doc.to<JsonObject>();
+    
+    // Create a nested JSON object for the 'msg' field
+    JsonObject msgObj = dataObj.createNestedObject("msg");
+    
+    // Assign values to the 'msg' JSON object
+    msgObj["x"] = measurement.msg.x;
+    msgObj["y"] = measurement.msg.y;
+    msgObj["z"] = measurement.msg.z;
+
+    // Serialize JSON to a String
+    String jsonString;
+    serializeJson(doc, jsonString);
+
+    // Set fingerprint
+    client.setFingerprint(fingerprint);
+
+    // Your Domain name with URL path or IP address with path
+    http.begin(client, url);
+
+    // Specify content-type header
+    http.addHeader("Content-Type", "application/json");
+
+    // Send HTTP POST request
+    int httpResponseCode = http.POST(jsonString);
+    
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+    Serial.println(http.getString());
+    // Free resources
+    http.end();
+
+    delay(500);
+}

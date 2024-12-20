@@ -1,0 +1,34 @@
+import time
+import board
+import digitalio
+import usb_hid
+from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.keycode import Keycode
+
+kbd = Keyboard(usb_hid.devices)
+
+# Define buttons. These can be any physical switches/buttons, but the values
+button = digitalio.DigitalInOut(board.GP10)
+button.direction = digitalio.Direction.INPUT
+button.pull = digitalio.Pull.DOWN
+
+# Variable to keep track of the previous button state
+prev_button_state = False
+
+while True:
+    # Read the current button state
+    current_button_state = button.value
+
+    # Check if there's a state change (button pressed)
+    if current_button_state and not prev_button_state:
+        # Trigger the action once per button press
+        kbd.send(Keycode.E)
+
+    # Update the previous button state
+    prev_button_state = current_button_state
+
+    # A small delay to avoid rapid multiple detections due to switch bouncing
+    time.sleep(0.1)
+
+
+

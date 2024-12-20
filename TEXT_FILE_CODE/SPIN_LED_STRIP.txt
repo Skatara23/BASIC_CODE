@@ -1,0 +1,114 @@
+import time
+from neopixel import Neopixel
+import colors
+import random
+from machine import Pin
+from utime import sleep_ms, sleep
+import os
+
+button = Pin(12, Pin.IN, Pin.PULL_DOWN)
+
+# pre calculate the stop index
+index = random.randint(0,6)
+print(index)
+
+numpix = 10
+pixels = Neopixel(numpix, 0, 28, "GRB")
+pixels.brightness(255)
+
+def interpolation(d, x):
+    output = d[0][1] + (x - d[0][0]) * ((d[1][1] - d[0][1])/(d[1][0] - d[0][0]))
+    output = round(output, 3)
+    print(output)
+    return output
+
+data_fast = [[1, 0.001],[10, 0.007]]
+data=[[1, 0.1],[10, 0.7]]
+
+
+segments = [
+[0],
+[1],
+[2],
+[3],
+[4],
+[5],
+[6],
+[7],
+[8],
+[9]
+]
+
+def light_segment(segment, color):
+    for pixel in segment:
+        pixels.set_pixel(pixel, color)
+    pixels.show()
+    
+def clear_segment(segment):
+    for pixel in segment:
+        pixels.set_pixel(pixel, colors.Black)
+    pixels.show()
+
+def initialize():
+    for segment in segments:
+        clear_segment(segment)
+        
+def rotate_anim(delay, color):
+    for segment in segments:
+            light_segment(segment, color)
+            time.sleep(delay)
+            clear_segment(segment)
+            
+def rotate(times, data, color):
+    for x in range(1, times):
+        rotate_anim(interpolation(data, x), color)
+       # print(interpolation(data, x))
+        
+def stop_at_random():
+    initialize()
+    print("STOPPING NOW")
+    segments_sliced = segments[0:index]
+    for segment in segments_sliced:
+        light_segment(segment, colors.White)
+        time.sleep(1)
+        clear_segment(segment)
+        if segments_sliced.index(segment) != (len(segments_sliced)-1):
+            light_segment(segment, colors.White)
+        else:
+            light_segment(segment, colors.Green)
+            time.sleep(10)
+        initialize()
+    
+def spinwheel():
+    spinning = True
+    # Initialize the LEDs
+    initialize()
+    rotate(50, data_fast, colors.Blue)
+    rotate(5, data, colors.Red)
+    stop_at_random()
+    spinning = False
+    
+
+
+prev_state = button.value()
+initialize()
+
+while True:
+    cur_state = button.value()
+    if cur_state != prev_state:
+        if cur_state:
+            print("BTN is down")
+            index = random.randint(1,6)
+            spinwheel()
+        else:
+            print("BTN is up")
+
+    prev_state = cur_state    
+
+        
+
+
+
+
+
+

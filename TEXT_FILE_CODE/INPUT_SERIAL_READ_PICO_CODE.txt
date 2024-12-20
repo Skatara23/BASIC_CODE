@@ -1,0 +1,40 @@
+import select
+import sys
+import time
+import machine
+import max7219
+import re
+from machine import Pin, SPI
+
+spi = SPI(0, baudrate=10000000, polarity=1, phase=0, sck=Pin(2), mosi=Pin(3))
+ss = Pin(5, Pin.OUT)
+
+display = max7219.Matrix8x8(spi, ss, 8)
+display.brightness(1)   # adjust brightness 1 to 15
+display.fill(0)
+display.show()
+time.sleep(0.5)
+
+# Create an instance of a polling object 
+poll_obj = select.poll()
+# Register sys.stdin (standard input) for monitoring read events with priority 1
+poll_obj.register(sys.stdin, 1)
+
+def show_display(input_buffer):
+     display.text(input_buffer,0,0,1)
+     display.show()
+
+def read_input():
+    input_buffer = ""    
+    while poll_obj.poll(0):
+        ch = sys.stdin.read(1)
+        input_buffer += ch
+    return input_buffer
+        
+while True:
+    input_buffer = read_input()
+    if input_buffer != read_input():
+        display.fill(0)
+    show_display(re.sub('\W+\s+','', input_buffer))
+    time.sleep(0.1)
+

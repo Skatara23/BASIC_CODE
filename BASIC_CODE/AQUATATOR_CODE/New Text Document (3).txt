@@ -1,0 +1,57 @@
+import machine
+import time
+
+# Define GPIO pins for L298N control
+IN1 = machine.Pin(6, machine.Pin.OUT)
+IN2 = machine.Pin(7, machine.Pin.OUT)
+IN3 = machine.Pin(8, machine.Pin.OUT)
+IN4 = machine.Pin(9, machine.Pin.OUT)
+
+# Define GPIO pin for the button
+BUTTON_PIN = machine.Pin(16, machine.Pin.IN, machine.Pin.PULL_DOWN)
+
+# Define function to extend the actuator4
+def extend_actuator():
+    IN1.on()
+    IN2.off()
+    IN3.off()
+    IN4.on()
+
+# Define function to retract the actuator
+def retract_actuator():
+    IN1.off()
+    IN2.on()
+    IN3.on()
+    IN4.off()
+
+def init():
+    retract_actuator()
+    time.sleep(4)
+    print("init_done")
+
+# Function to perform one cycle of extending and retracting
+def perform_cycle():
+    extend_actuator()
+    time.sleep(4)  # Adjust this time as needed for your actuator
+    retract_actuator()
+    time.sleep(4)  # Adjust this time as needed for your actuator
+
+# Debounce variables
+last_button_state = 0  # Initialize with button released
+debounce_delay = 50   # Adjust this value as needed for your debounce
+
+init()
+print("READY")
+while True:
+    button_state = BUTTON_PIN.value()
+    print(button_state)
+    # Check for a button press with debouncing
+    if button_state != last_button_state:
+        time.sleep_ms(debounce_delay)
+        button_state = BUTTON_PIN.value()
+        
+        if button_state == 1:  # Button pressed
+            perform_cycle()
+    
+    last_button_state = button_state
+

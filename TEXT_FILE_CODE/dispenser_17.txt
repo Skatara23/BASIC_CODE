@@ -1,0 +1,349 @@
+"""import time
+from machine import Pin
+import bluetooth
+from ble_simple_peripheral import BLESimplePeripheral
+
+# Initialize Bluetooth Low Energy (BLE)
+ble = bluetooth.BLE()
+sp = BLESimplePeripheral(ble)
+
+# Define GPIO pins for L298N control
+IN1 = Pin(6, Pin.OUT)
+IN2 = Pin(7, Pin.OUT)
+IN3 = Pin(8, Pin.OUT)
+IN4 = Pin(9, Pin.OUT)
+
+# Define GPIO pin for the button
+BUTTON_PIN = Pin(16, Pin.IN, Pin.PULL_DOWN)
+
+# Define GPIO pin for the LED
+LED_PIN = Pin(2, Pin.OUT)  # Choose an appropriate GPIO pin for your LED
+
+# Define function to extend the actuator
+def extend_actuator():
+    IN1.on()
+    IN2.off()
+    IN3.off()
+    IN4.on()
+    #time.sleep(1)
+
+# Define function to retract the actuator
+def retract_actuator():
+    IN1.off()
+    IN2.on()
+    IN3.on()
+    IN4.off()
+    #time.sleep(1)
+
+# Function to initialize the actuator state
+def init_actuator():
+    #retract_actuator()
+    #time.sleep(1)
+    extend_actuator()
+    time.sleep(1)
+    print("Actuator initialized")
+
+# Counter to track the number of activations
+activation_count = 0
+MAX_ACTIVATIONS = 20  # Maximum number of activations allowed
+
+# Function to handle received data
+def on_rx(data):
+    global activation_count  # Use the global activation_count variable
+    
+    if activation_count >= MAX_ACTIVATIONS:
+        print("Maximum activations reached. System will no longer respond.")
+        return  # Stop processing further inputs if the maximum count is reached
+    
+    # Decode and parse the incoming data
+    data_str = data.decode('utf-8').strip()
+    
+    if data_str.startswith("dispense"):
+        key, value = data_str.split("=")
+        if value == '1':
+            #extend_actuator()
+            #time.sleep(6)
+            #retract_actuator()
+            #time.sleep(6)
+            retract_actuator()
+            time.sleep(10)  # Adjust this time as needed for your actuator
+            extend_actuator()
+            time.sleep(10)
+            activation_count += 1  # Increment the counter
+
+# Set the callback for received data
+sp.on_write(on_rx)
+
+# Initialize the actuator
+init_actuator()
+print("System Ready")
+
+# Main loop
+while True:
+    if sp.is_connected():
+        LED_PIN.on()  # Turn on LED when connected
+    else:
+        LED_PIN.off()  # Turn off LED when not connected
+
+    button_state = BUTTON_PIN.value()
+    if button_state == 1 and activation_count < MAX_ACTIVATIONS:  # Button pressed
+        retract_actuator()
+        time.sleep(10)  # Adjust this time as needed for your actuator
+        extend_actuator()
+        time.sleep(10)  # Adjust this time as needed for your actuator
+        #retract_actuator()
+        #time.sleep(14)  # Adjust this time as needed for your actuator
+        activation_count += 1  # Increment the counter
+
+    if activation_count >= MAX_ACTIVATIONS:
+        print("Maximum activations reached. Stopping system.")
+        break  # Exit the loop when the maximum number of activations is reached
+
+"""
+"""import time
+from machine import Pin
+import bluetooth
+from ble_simple_peripheral import BLESimplePeripheral
+
+# Initialize Bluetooth Low Energy (BLE)
+ble = bluetooth.BLE()
+sp = BLESimplePeripheral(ble)
+
+# Define GPIO pins for L298N control
+IN1 = Pin(6, Pin.OUT)
+IN2 = Pin(7, Pin.OUT)
+IN3 = Pin(8, Pin.OUT)
+IN4 = Pin(9, Pin.OUT)
+
+# Define GPIO pin for the button
+BUTTON_PIN = Pin(16, Pin.IN, Pin.PULL_DOWN)
+
+# Define function to extend the actuator
+def extend_actuator():
+    IN1.on()
+    IN2.off()
+    IN3.off()
+    IN4.on()
+    time.sleep(1)
+
+# Define function to retract the actuator
+def retract_actuator():
+    IN1.off()
+    IN2.on()
+    IN3.on()
+    IN4.off()
+    time.sleep(1)
+
+# Function to initialize the actuator state
+def init_actuator():
+    retract_actuator()
+    time.sleep(1)
+    print("Actuator initialized")
+
+# Counter to track the number of activations
+activation_count = 0
+MAX_ACTIVATIONS = 20 # Maximum number of activations allowed
+
+# Function to handle received data
+def on_rx(data):
+    global activation_count  # Use the global activation_count variable
+    
+    if activation_count >= MAX_ACTIVATIONS:
+        print("Maximum activations reached. System will no longer respond.")
+        return  # Stop processing further inputs if the maximum count is reached
+    
+    # Decode and parse the incoming data
+    data_str = data.decode('utf-8').strip()
+    
+    if data_str.startswith("dispense"):
+        key, value = data_str.split("=")
+        if value == '1':
+            extend_actuator()
+            time.sleep(6)
+            retract_actuator()
+            time.sleep(6)
+            activation_count += 1  # Increment the counter
+
+# Set the callback for received data
+sp.on_write(on_rx)
+
+# Initialize the actuator
+init_actuator()
+print("System Ready")
+
+# Main loop
+while True:
+    if sp.is_connected():
+        pass  # Optionally, you can add code here to handle other tasks while connected
+
+    button_state = BUTTON_PIN.value()
+    if button_state == 1 and activation_count < MAX_ACTIVATIONS:  # Button pressed
+        extend_actuator()
+        time.sleep(6)  # Adjust this time as needed for your actuator
+        retract_actuator()
+        time.sleep(6)  # Adjust this time as needed for your actuator
+        activation_count += 1  # Increment the counter
+
+    if activation_count >= MAX_ACTIVATIONS:
+        print("Maximum activations reached. Stopping system.")
+        break  # Exit the loop when the maximum number of activations is reached
+
+"""
+
+# is a right code
+import time
+from machine import Pin
+import bluetooth
+from ble_simple_peripheral import BLESimplePeripheral
+#import threading
+
+# Initialize Bluetooth Low Energy (BLE)
+ble = bluetooth.BLE()
+sp = BLESimplePeripheral(ble)
+
+# Define GPIO pins for L298N control
+IN1 = Pin(6, Pin.OUT)
+IN2 = Pin(7, Pin.OUT)
+IN3 = Pin(8, Pin.OUT)
+IN4 = Pin(9, Pin.OUT)
+
+# Define GPIO dpin for the button
+BUTTON_PIN = Pin(16, Pin.IN, Pin.PULL_DOWN)
+
+# Define function to extend the actuator
+def extend_actuator():
+    IN1.on()
+    IN2.off()
+    IN3.off()
+    IN4.on()
+    time.sleep(1)
+
+# Define function to retract the actuator
+def retract_actuator():
+    IN1.off()
+    IN2.on()
+    IN3.on()
+    IN4.off()
+    time.sleep(1)
+
+# Function to initialize the actuator state
+def init_actuator():
+    extend_actuator()
+    time.sleep(1)
+    print("Actuator initialized")
+
+# Function to handle received data
+
+# Global variable to track the last command time
+
+# Flag to indicate if the function is busy processing an input
+def on_rx(data):
+    # Decode and parse the incoming data
+    data_str = data.decode('utf-8').strip()
+    
+    if data_str.startswith("dispense"):
+        key, value = data_str.split("=")
+        if value == '1':  # Corrected the syntax error here
+            retract_actuator()
+            time.sleep(10)
+            extend_actuator()
+            time.sleep(10)
+            
+           
+# Set the callback for received data
+ 
+
+sp.on_write(on_rx)
+
+# Initialize the actuator
+init_actuator()
+print("System Ready")
+
+# Main loop
+while True:
+    if sp.is_connected():
+        pass  # Optionally, you can add code here to handle other tasks while connected
+
+    #button_state = BUTTON_PIN.value()
+    #if button_state == 1:  # Button pressed
+     #   retract_actuator()
+     #   time.sleep(4)  # Adjust this time as needed for your actuator
+     #   extend_actuator()
+     #   time.sleep(4)  # Adjust this time as needed for your actuator
+        
+
+
+
+"""import time
+from machine import Pin
+import bluetooth
+from ble_simple_peripheral import BLESimplePeripheral
+
+# Initialize Bluetooth Low Energy (BLE)
+ble = bluetooth.BLE()
+sp = BLESimplePeripheral(ble)
+
+# Define GPIO pins for L298N control
+IN1 = Pin(6, Pin.OUT)
+IN2 = Pin(7, Pin.OUT)
+IN3 = Pin(8, Pin.OUT)
+IN4 = Pin(9, Pin.OUT)
+
+# Define GPIO pin for the button
+BUTTON_PIN = Pin(16, Pin.IN, Pin.PULL_DOWN)
+
+# Define function to extend the actuator
+def extend_actuator():
+    print("Extending actuator...")
+    IN1.on()
+    IN2.off()
+    IN3.off()
+    IN4.on()
+
+# Define function to retract the actuator
+def retract_actuator():
+    print("Retracting actuator...")
+    IN1.off()
+    IN2.on()
+    IN3.on()
+    IN4.off()
+
+# Function to initialize the actuator state
+def init_actuator():
+    retract_actuator()
+    time.sleep(1)
+    print("Actuator initialized")
+
+# Function to handle received data
+def on_rx(data):
+    # Decode and parse the incoming data
+    data_str = data.decode('utf-8').strip()
+    
+    if data_str == '1':
+        extend_actuator()
+    #elif data_str == '0':
+        time.sleep(5)
+        retract_actuator()
+
+# Set the callback for received data
+sp.on_write(on_rx)
+
+
+# Initialize the actuator
+init_actuator()
+print("System Ready")
+
+# Main loop
+while True:
+    if sp.is_connected():
+        pass  # Optionally, you can add code here to handle other tasks while connected
+
+    button_state = BUTTON_PIN.value()
+    if button_state == 1:  # Button pressed
+        print("Button pressed, activating actuator...")
+        extend_actuator()
+        time.sleep(6)  # Adjust this time as needed for your actuator
+        retract_actuator()
+        time.sleep(6)  # Adjust this time as needed for your actuator
+
+"""

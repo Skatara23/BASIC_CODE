@@ -1,0 +1,39 @@
+import select
+import sys
+import time
+import machine
+import max7219
+import re
+from machine import Pin, SPI
+
+spi = SPI(0, baudrate=10000000, polarity=1, phase=0, sck=Pin(2), mosi=Pin(3))
+ss = Pin(5, Pin.OUT)
+
+# Create an instance of max7219 Matrix8x8 display
+display = max7219.Matrix8x8(spi, ss, 8)
+display.brightness(0)   # adjust brightness 1 to 15
+display.fill(0)
+display.show()
+time.sleep(0.5)
+
+# Create an instance of a polling object 
+poll_obj = select.poll()
+# Register sys.stdin (standard input) for monitoring read events with priority 1
+poll_obj.register(sys.stdin, 1)
+
+def read_input():
+    input_buffer = sys.stdin.readline().strip()  # Read input from stdin and strip any leading/trailing whitespace
+    return re.sub(r'\W+', ' ', input_buffer)  # Remove non-word characters and extra spaces
+
+def show_display(input_buffer):
+#     for x in range(32, -len(input_buffer)*8,-1):  # Adjusted range to scroll the message correctly
+        display.fill(0)  # Clear the display before showing new message
+        display.text(input_buffer, -x, 0, 1)  # Scroll the message
+        display.show()
+        time.sleep(0.1)
+
+while True:
+    input_buffer = read_input()
+    for x in range(32, -len(input_buffer)*8,-1):
+        show_display(input_buffer)
+

@@ -1,0 +1,34 @@
+from machine import Pin, ADC
+import time
+
+# Define GPIO pins
+TOUCH_SENSOR_PIN = 26  # Example pin number, choose according to your setup
+# LED_PIN ="LED"  # Example pin number, choose according to your setup
+
+# Initialize the touch sensor pin as an ADC pin
+touch_sensor = ADC(Pin(TOUCH_SENSOR_PIN))
+
+# Initialize the LED pin
+led = Pin("LED", Pin.OUT)
+
+count=0
+
+while True:
+    # Read the touch sensor value
+    touch_value = touch_sensor.read_u16()  # Read the raw ADC value
+    
+    # If touch sensor is touched
+    if touch_value < 500:  # Adjust this threshold according to your touch sensor sensitivity
+        # Turn on the LED
+        led.value(0)
+        time.sleep(1)
+    else:
+        # Turn off the LED
+        count=count+1
+        led.value(1)
+        print(f"Touch detected {count} times")
+        time.sleep(1)
+
+    # Add a small delay to debounce the touch sensor
+#     time.sleep(0.1)
+
